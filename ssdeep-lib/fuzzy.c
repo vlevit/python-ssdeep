@@ -686,11 +686,14 @@ static uint32_t score_strings(const char *s1,
     return 0;
   }
 
-  // the two strings must have a common substring of length
-  // ROLLING_WINDOW to be candidates
-  if (has_common_substring(s1, s2) == 0) {
-    return 0;
-  }
+  /* Do not require strings to have common substring of length
+   * ROLLING_WINDOW to be candidates - make it work for short strings
+   * too.
+   *
+   * if (has_common_substring(s1, s2) == 0) {
+   *   return 0;
+   * }
+   */
 
   // compute the edit distance between the two strings. The edit distance gives
   // us a pretty good idea of how closely related the two strings are
@@ -719,10 +722,15 @@ static uint32_t score_strings(const char *s1,
   // when the blocksize is small we don't want to exaggerate the match size
   if (block_size >= (99 + ROLLING_WINDOW) / ROLLING_WINDOW * MIN_BLOCKSIZE)
     return score;
-  if (score > block_size/MIN_BLOCKSIZE * MIN(len1, len2))
-  {
-    score = block_size/MIN_BLOCKSIZE * MIN(len1, len2);
-  }
+
+  /* Don't intentionally screw up the score for short strings.
+   *
+   * if (score > block_size/MIN_BLOCKSIZE * MIN(len1, len2))
+   * {
+   *   score = block_size/MIN_BLOCKSIZE * MIN(len1, len2);
+   * }
+   */
+
   return score;
 }
 
